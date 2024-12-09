@@ -337,9 +337,9 @@ end)
 CreateElement("ScrollFrame", function(Color, Width)
 	local ScrollFrame = Create("ScrollingFrame", {
 		BackgroundTransparency = 1,
-		MidImage = "rbxassetid://103928780885515",
-		BottomImage = "rbxassetid://103928780885515",
-		TopImage = "rbxassetid://103928780885515",
+		MidImage = "rbxassetid://7445543667",
+		BottomImage = "rbxassetid://7445543667",
+		TopImage = "rbxassetid://7445543667",
 		ScrollBarImageColor3 = Color,
 		BorderSizePixel = 0,
 		ScrollBarThickness = Width,
@@ -481,14 +481,14 @@ function OrionLib:MakeWindow(WindowConfig)
 	local UIHidden = false
 
 	WindowConfig = WindowConfig or {}
-	WindowConfig.Name = WindowConfig.Name or "ScriptCentral|Universal Hub"
+	WindowConfig.Name = WindowConfig.Name or "CentralScript/Universal Hub"
 	WindowConfig.ConfigFolder = WindowConfig.ConfigFolder or WindowConfig.Name
 	WindowConfig.SaveConfig = WindowConfig.SaveConfig or false
 	WindowConfig.HidePremium = WindowConfig.HidePremium or false
 	if WindowConfig.IntroEnabled == nil then
 		WindowConfig.IntroEnabled = true
 	end
-	WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral|Universal Hub"
+	WindowConfig.IntroText = WindowConfig.IntroText or "CentralScript/Universal Hub"
 	WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
 	WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
 	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://103928780885515"
@@ -524,7 +524,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0.5, 0, 0, 0),
 		BackgroundTransparency = 1
 	}), {
-		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072725342"), {
 			Position = UDim2.new(0, 9, 0, 6),
 			Size = UDim2.new(0, 18, 0, 18)
 		}), "Text")
@@ -534,7 +534,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Size = UDim2.new(0.5, 0, 1, 0),
 		BackgroundTransparency = 1
 	}), {
-		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072719338"), {
 			Position = UDim2.new(0, 9, 0, 6),
 			Size = UDim2.new(0, 18, 0, 18),
 			Name = "Ico"
@@ -577,7 +577,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				SetProps(MakeElement("Image", "https://www.roblox.com/headshot-thumbnail/image?userId=".. LocalPlayer.UserId .."&width=420&height=420&format=png"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				}),
-				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4031889928"), {
 					Size = UDim2.new(1, 0, 1, 0),
 				}), "Second"),
 				MakeElement("Corner", 1)
@@ -749,7 +749,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
-			MinimizeBtn.Ico.Image = "rbxassetid://103928780885515"
+			MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
 			wait(.02)
 			MainWindow.ClipsDescendants = false
 			WindowStuff.Visible = true
@@ -757,7 +757,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		else
 			MainWindow.ClipsDescendants = true
 			WindowTopBarLine.Visible = false
-			MinimizeBtn.Ico.Image = "rbxassetid://103928780885515"
+			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
 
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
 			wait(0.1)
@@ -969,7 +969,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				ButtonConfig = ButtonConfig or {}
 				ButtonConfig.Name = ButtonConfig.Name or "Button"
 				ButtonConfig.Callback = ButtonConfig.Callback or function() end
-				ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://103928780885515"
+				ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
 
 				local Button = {}
 
@@ -1045,7 +1045,7 @@ function OrionLib:MakeWindow(WindowConfig)
 						Name = "Stroke",
 						Transparency = 0.5
 					}),
-					SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+					SetProps(MakeElement("Image", "rbxassetid://3944680095"), {
 						Size = UDim2.new(0, 20, 0, 20),
 						AnchorPoint = Vector2.new(0.5, 0.5),
 						Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -1241,7 +1241,7 @@ function OrionLib:MakeWindow(WindowConfig)
 							Font = Enum.Font.GothamBold,
 							Name = "Content"
 						}), "Text"),
-						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
 							Size = UDim2.new(0, 20, 0, 20),
 							AnchorPoint = Vector2.new(0, 0.5),
 							Position = UDim2.new(1, -30, 0.5, 0),
@@ -1585,7 +1585,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				local Color = Create("ImageLabel", {
 					Size = UDim2.new(1, -25, 1, 0),
 					Visible = false,
-					Image = "rbxassetid://103928780885515"
+					Image = "rbxassetid://4155801252"
 				}, {
 					Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
 					ColorSelection
@@ -1791,7 +1791,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				Size = UDim2.new(1, 0, 1, 0),
 				Parent = ItemParent
 			}), {
-				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://3610239960"), {
 					Size = UDim2.new(0, 18, 0, 18),
 					Position = UDim2.new(0, 15, 0, 15),
 					ImageTransparency = 0.4
@@ -1801,7 +1801,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					Position = UDim2.new(0, 38, 0, 18),
 					TextTransparency = 0.4
 				}), "Text"),
-				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://103928780885515"), {
+				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4483345875"), {
 					Size = UDim2.new(0, 56, 0, 56),
 					Position = UDim2.new(0, 84, 0, 110),
 				}), "Text"),
