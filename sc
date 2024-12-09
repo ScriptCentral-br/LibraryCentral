@@ -337,9 +337,9 @@ end)
 CreateElement("ScrollFrame", function(Color, Width)
 	local ScrollFrame = Create("ScrollingFrame", {
 		BackgroundTransparency = 1,
-		MidImage = "rbxassetid://90685941326593",
-		BottomImage = "rbxassetid://90685941326593",
-		TopImage = "rbxassetid://90685941326593",
+		MidImage = "rbxassetid://7445543667",
+		BottomImage = "rbxassetid://7445543667",
+		TopImage = "rbxassetid://7445543667",
 		ScrollBarImageColor3 = Color,
 		BorderSizePixel = 0,
 		ScrollBarThickness = Width,
@@ -481,18 +481,18 @@ function OrionLib:MakeWindow(WindowConfig)
 	local UIHidden = false
 
 	WindowConfig = WindowConfig or {}
-	WindowConfig.Name = WindowConfig.Name or "ScriptCentral|Universal"
+	WindowConfig.Name = WindowConfig.Name or "ScriptCentral/Universal Hub"
 	WindowConfig.ConfigFolder = WindowConfig.ConfigFolder or WindowConfig.Name
 	WindowConfig.SaveConfig = WindowConfig.SaveConfig or false
 	WindowConfig.HidePremium = WindowConfig.HidePremium or false
 	if WindowConfig.IntroEnabled == nil then
 		WindowConfig.IntroEnabled = true
 	end
-	WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral|Universal"
+	WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral/Universal Hub"
 	WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
 	WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
-	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://14229447778"
-	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://14229447778"
+	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://90685941326593"
+	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://90685941326593"
 	WindowConfig.SearchBar = WindowConfig.SearchBar or nil
 	OrionLib.Folder = WindowConfig.ConfigFolder
 	OrionLib.SaveCfg = WindowConfig.SaveConfig
