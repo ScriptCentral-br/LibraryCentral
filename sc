@@ -706,7 +706,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	-- @ UI Visible & Mobile Icon Handle (Zv-yz/github);
 	local _currentKey = Enum.KeyCode.RightShift;
 	local isMobile = table.find({ Enum.Platform.IOS, Enum.Platform.Android }, UserInputService:GetPlatform());
-	local MobileIcon = SetChildren(SetProps(MakeElement("ImageButton", "http://www.roblox.com/asset/?id=17570737246"), {
+	local MobileIcon = SetChildren(SetProps(MakeElement("ImageButton", "http://www.roblox.com/asset/?id=103928780885515"), {
 		Position = UDim2.new(0.25, 0, 0.1, 0);
 		Size = UDim2.new(0, 32, 0, 33);
 		-- Position = UDim2.new(0.52, 0, 0, 0);
@@ -1570,7 +1570,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					ScaleType = Enum.ScaleType.Fit,
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundTransparency = 1,
-					Image = "http://www.roblox.com/asset/?id=4805639010392878088551500"
+					Image = "http://www.roblox.com/asset/?id=4805639000"
 				})
 
 				local HueSelection = Create("ImageLabel", {
@@ -1579,7 +1579,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					ScaleType = Enum.ScaleType.Fit,
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundTransparency = 1,
-					Image = "http://www.roblox.com/asset/?id=103928780885515"
+					Image = "http://www.roblox.com/asset/?id=4805639000"
 				})
 
 				local Color = Create("ImageLabel", {
