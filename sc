@@ -1570,7 +1570,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					ScaleType = Enum.ScaleType.Fit,
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundTransparency = 1,
-					Image = "http://www.roblox.com/asset/?id=4805639000"
+					Image = "http://www.roblox.com/asset/?id=4805639010392878088551500"
 				})
 
 				local HueSelection = Create("ImageLabel", {
@@ -1579,7 +1579,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					ScaleType = Enum.ScaleType.Fit,
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundTransparency = 1,
-					Image = "http://www.roblox.com/asset/?id=4805639000"
+					Image = "http://www.roblox.com/asset/?id=103928780885515"
 				})
 
 				local Color = Create("ImageLabel", {
