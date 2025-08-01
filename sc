@@ -96,36 +96,65 @@ task.spawn(function()
 end)
  -- Começo
 local function MakeDraggable(DragPoint, Main)
-	--pcall(function()
-		local Dragging, DragInput, MousePos, FramePos = false
-		AddConnection(DragPoint.InputBegan, function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-				Dragging = true
-				MousePos = Input.Position
-				FramePos = Main.Position
+    local Dragging, TouchId, StartMousePos, StartFramePos = false
 
-				Input.Changed:Connect(function()
-					if Input.UserInputState == Enum.UserInputState.End then
-						Dragging = false
-					end
-				end)
-			end
-		end)
-		AddConnection(DragPoint.InputChanged, function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseMovement then
-				DragInput = Input
-			end
-		end)
-		AddConnection(UserInputService.InputChanged, function(Input)
-			if Input == DragInput and Dragging then
-				local Delta = Input.Position - MousePos
-				--TweenService:Create(Main, TweenInfo.new(0.05, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position  = UDim2.new(FramePos.X.Scale,FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
-				Main.Position  = UDim2.new(FramePos.X.Scale,FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
-			end
-		end)
-	--end)
-end    
+    -- Eventos para Mouse
+    AddConnection(DragPoint.InputBegan, function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Dragging = true
+            StartMousePos = Input.Position
+            StartFramePos = Main.Position
 
+            -- Desconecta o dragging quando o input termina
+            local connection
+            connection = Input.Changed:Connect(function()
+                if Input.UserInputState == Enum.UserInputState.End then
+                    Dragging = false
+                    connection:Disconnect() -- Desconecta para evitar vazamento de memória
+                end
+            end)
+        end
+    end)
+
+    AddConnection(UserInputService.InputChanged, function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseMovement and Dragging then
+            local Delta = Input.Position - StartMousePos
+            Main.Position = UDim2.new(StartFramePos.X.Scale, StartFramePos.X.Offset + Delta.X, StartFramePos.Y.Scale, StartFramePos.Y.Offset + Delta.Y)
+        end
+    end)
+
+    -- **NOVA LÓGICA PARA TOQUE (MOBILE)**
+    AddConnection(DragPoint.TouchBegan, function(Touch, GameProcessedEvent)
+        if not GameProcessedEvent then -- Garante que o toque não foi consumido por outro elemento da UI do Roblox
+            Dragging = true
+            TouchId = Touch.TouchId
+            StartMousePos = Touch.Position
+            StartFramePos = Main.Position
+
+            -- Desconecta o dragging quando o toque termina
+            local connection
+            connection = Touch.Changed:Connect(function()
+                if Touch.UserInputState == Enum.UserInputState.End then
+                    Dragging = false
+                    connection:Disconnect()
+                end
+            end)
+        end
+    end)
+
+    AddConnection(UserInputService.TouchMoved, function(Touch, GameProcessedEvent)
+        if not GameProcessedEvent and Dragging and Touch.TouchId == TouchId then
+            local Delta = Touch.Position - StartMousePos
+            Main.Position = UDim2.new(StartFramePos.X.Scale, StartFramePos.X.Offset + Delta.X, StartFramePos.Y.Scale, StartFramePos.Y.Offset + Delta.Y)
+        end
+    end)
+
+    AddConnection(UserInputService.TouchEnded, function(Touch, GameProcessedEvent)
+        if not GameProcessedEvent and Touch.TouchId == TouchId then
+            Dragging = false
+        end
+    end)
+end
 -- Fim
 local function Create(Name, Properties, Children)
 	local Object = Instance.new(Name)
