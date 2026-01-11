@@ -541,7 +541,8 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetChildren(SetProps(MakeElement("Frame"), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 32, 0, 32),
-				Position = UDim2.new(0, 12, 0.5, 0)
+				Position = UDim2.new(0, 12, 0.5, 0),
+				ClipsDescendants = true -- CORREÇÃO: Isso corta a imagem para ela ficar redonda dentro do Corner
 			}), {
 				-- CORRIGIDO: Link de imagem do perfil usando rbxthumb (mais estável)
 				SetProps(MakeElement("Image", "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"), {
@@ -616,7 +617,8 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5), 
 		Size = UDim2.new(0, 0, 0, 0), 
-		ClipsDescendants = true
+		ClipsDescendants = true,
+		Visible = false -- CORREÇÃO: Começa invisível para não aparecer junto com o Loading
 	}), {
 		SetChildren(SetProps(MakeElement("TFrame"), {
 			Size = UDim2.new(1, 0, 0, 50),
@@ -645,9 +647,13 @@ function OrionLib:MakeWindow(WindowConfig)
 		AddThemeObject(SetProps(MakeElement("Stroke", Color3.new(0,0,0), 3, 0.7),{}),"Stroke") 
 	}), "Main")
 
-	TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Size = UDim2.new(0, 650, 0, 380) 
-	}):Play()
+	-- Se não tiver intro, exibe imediatamente com animação
+	if not WindowConfig.IntroEnabled then
+		MainWindow.Visible = true
+		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 650, 0, 380) 
+		}):Play()
+	end
 
 	if WindowConfig.ShowIcon then
 		WindowName.Position = UDim2.new(0, 50, 0, -24)
@@ -679,8 +685,16 @@ function OrionLib:MakeWindow(WindowConfig)
 	MakeDraggable(OpenButton, OpenButton)
 
 	AddConnection(OpenButton.MouseButton1Click, function()
+		-- CORREÇÃO: Resetar totalmente o estado ao reabrir pelo Hub
 		MainWindow.Visible = true
 		OpenButton.Visible = false
+		
+		-- Resetar estado de minimizado se tiver travado
+		Minimized = false
+		WindowStuff.Visible = true
+		MainWindow.ClipsDescendants = true
+		MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
+		
 		MainWindow.Size = UDim2.new(0,0,0,0)
 		TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 380)}):Play()
 	end)
@@ -707,6 +721,12 @@ function OrionLib:MakeWindow(WindowConfig)
 			else
 				OpenButton.Visible = false -- Esconde o botão ao abrir
 				MainWindow.Visible = true
+				
+				-- Resetar estado de minimizado ao abrir por tecla
+				Minimized = false
+				WindowStuff.Visible = true
+				MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
+				
 				TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 380)}):Play()
 			end
 		end
@@ -795,6 +815,12 @@ function OrionLib:MakeWindow(WindowConfig)
 		TweenService:Create(IntroCard, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
 		wait(0.4)
 		IntroCard:Destroy()
+
+		-- CORREÇÃO: Só mostra a janela principal AGORA, depois que o loading sumiu
+		MainWindow.Visible = true
+		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 650, 0, 380) 
+		}):Play()
 	end
 
 	if WindowConfig.IntroEnabled then
@@ -1268,8 +1294,10 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
 					Size = UDim2.new(1, 0, 0, 40),
-					Parent = ItemParent,
-					ClipsDescendants = true
+					Parent = ItemParent
+					-- Removido clipsdescendants aqui para dropdown poder passar por cima se necessario, mas nesse estilo fica dentro.
+					-- Mantendo clipsdescendants true pois o estilo "gaveta" exige.
+					, ClipsDescendants = true
 				}), {
 					DropdownContainer,
 					SetProps(SetChildren(MakeElement("TFrame"), {
