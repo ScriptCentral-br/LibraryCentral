@@ -14,14 +14,28 @@ local OrionLib = {
 	Flags = {},
 	Themes = {
 		Default = {
-			Main = Color3.fromRGB(25, 25, 25),
-			Second = Color3.fromRGB(32, 32, 32),
-			Stroke = Color3.fromRGB(60, 60, 60),
-			Divider = Color3.fromRGB(45, 45, 45),
-			Text = Color3.fromRGB(240, 240, 240),
-			TextDark = Color3.fromRGB(150, 150, 150),
-			Accent = Color3.fromRGB(0, 110, 255),
-			hover = Color3.fromRGB(40, 40, 40)
+			-- Cores principais
+			Main = Color3.fromRGB(40, 42, 46),       -- Fundo principal (cinza escuro suave)
+			Second = Color3.fromRGB(50, 53, 58),      -- Fundo secundário
+			
+			-- Elementos de UI
+			Stroke = Color3.fromRGB(80, 85, 90),     -- Bordas
+			Divider = Color3.fromRGB(70, 75, 80),    -- Divisores
+			
+			-- Textos
+			Text = Color3.fromRGB(230, 230, 230),    -- Texto principal
+			TextDark = Color3.fromRGB(170, 175, 180),-- Texto secundário
+			
+			-- Novas cores adicionadas (opcionais)
+			Third = Color3.fromRGB(65, 68, 75),      -- Destaques
+			Hover = Color3.fromRGB(60, 65, 70),      -- Efeito hover
+			Accent = Color3.fromRGB(0, 122, 204),    -- Botões principais
+			AccentDark = Color3.fromRGB(0, 90, 158), -- Botões (hover)
+			ToggleOn = Color3.fromRGB(85, 170, 85),  -- Toggle ativo
+			ToggleOff = Color3.fromRGB(120, 120, 120),-- Toggle inativo
+			Success = Color3.fromRGB(85, 185, 85),   -- Sucesso
+			Warning = Color3.fromRGB(220, 165, 40),  -- Aviso
+			Error = Color3.fromRGB(210, 80, 80)      -- Erro
 		}
 	},
 	SelectedTheme = "Default",
