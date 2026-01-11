@@ -537,20 +537,21 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetProps(MakeElement("Frame"), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}), "Divider"),
-			-- CORREÇÃO DA FOTO DO PERFIL (BOLINHA)
+			-- CORREÇÃO DA FOTO DO PERFIL:
+			-- Removido AddThemeObject (que deixava cinza) e forçado ImageColor3 branco
 			SetChildren(SetProps(MakeElement("TFrame"), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 32, 0, 32),
 				Position = UDim2.new(0, 12, 0.5, 0)
 			}), {
-				AddThemeObject(SetChildren(SetProps(MakeElement("Image", "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"), {
+				SetChildren(SetProps(MakeElement("Image", "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"), {
 					Size = UDim2.new(1, 0, 1, 0),
-					BackgroundTransparency = 0, -- Mostra cor de fundo para preencher
-					BorderSizePixel = 0
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					ImageColor3 = Color3.fromRGB(255, 255, 255)
 				}), {
-					MakeElement("Corner", 1), -- Arredonda a IMAGEM
-					MakeElement("Stroke", Color3.fromRGB(255,255,255), 1, 0.5) -- Borda suave opcional
-				}), "Divider")
+					MakeElement("Corner", 1)
+				})
 			}),
 			AddThemeObject(SetProps(MakeElement("Label", LocalPlayer.DisplayName, WindowConfig.HidePremium and 14 or 13), {
 				Size = UDim2.new(1, -60, 0, 13),
@@ -704,7 +705,7 @@ function OrionLib:MakeWindow(WindowConfig)
 							
 							Minimized = false
 							WindowStuff.Visible = true
-							MainWindow.ClipsDescendants = true
+							MainWindow.ClipsDescendants = false -- FIX: Garante que está 'aberto' corretamente
 							MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
 							
 							MainWindow.Size = UDim2.new(0,0,0,0)
