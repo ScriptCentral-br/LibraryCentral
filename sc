@@ -81,7 +81,7 @@ task.spawn(function()
 	end
 end)
 
--- Sistema de Drag (Arrastar Janela) Suavizado
+-- Sistema de Drag (Arrastar Janela)
 local function MakeDraggable(DragPoint, Main)
 	local Dragging, DragInput, MousePos, FramePos = false
 	AddConnection(DragPoint.InputBegan, function(Input)
@@ -105,7 +105,6 @@ local function MakeDraggable(DragPoint, Main)
 	AddConnection(UserInputService.InputChanged, function(Input)
 		if Input == DragInput and Dragging then
 			local Delta = Input.Position - MousePos
-			-- Tween para movimento suave
 			TweenService:Create(Main, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				Position = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
 			}):Play()
@@ -538,18 +537,21 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetProps(MakeElement("Frame"), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}), "Divider"),
-			AddThemeObject(SetChildren(SetProps(MakeElement("Frame"), {
+			-- CORREÇÃO DA FOTO DO PERFIL (BOLINHA)
+			SetChildren(SetProps(MakeElement("TFrame"), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 32, 0, 32),
-				Position = UDim2.new(0, 12, 0.5, 0),
-				ClipsDescendants = true -- CORREÇÃO: Isso corta a imagem para ela ficar redonda dentro do Corner
+				Position = UDim2.new(0, 12, 0.5, 0)
 			}), {
-				-- CORRIGIDO: Link de imagem do perfil usando rbxthumb (mais estável)
-				SetProps(MakeElement("Image", "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"), {
-					Size = UDim2.new(1, 0, 1, 0)
-				}),
-				MakeElement("Corner", 1)
-			}), "Divider"),
+				AddThemeObject(SetChildren(SetProps(MakeElement("Image", "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"), {
+					Size = UDim2.new(1, 0, 1, 0),
+					BackgroundTransparency = 0, -- Mostra cor de fundo para preencher
+					BorderSizePixel = 0
+				}), {
+					MakeElement("Corner", 1), -- Arredonda a IMAGEM
+					MakeElement("Stroke", Color3.fromRGB(255,255,255), 1, 0.5) -- Borda suave opcional
+				}), "Divider")
+			}),
 			AddThemeObject(SetProps(MakeElement("Label", LocalPlayer.DisplayName, WindowConfig.HidePremium and 14 or 13), {
 				Size = UDim2.new(1, -60, 0, 13),
 				Position = WindowConfig.HidePremium and UDim2.new(0, 54, 0, 19) or UDim2.new(0, 54, 0, 12),
@@ -618,7 +620,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		AnchorPoint = Vector2.new(0.5, 0.5), 
 		Size = UDim2.new(0, 0, 0, 0), 
 		ClipsDescendants = true,
-		Visible = false -- CORREÇÃO: Começa invisível para não aparecer junto com o Loading
+		Visible = false 
 	}), {
 		SetChildren(SetProps(MakeElement("TFrame"), {
 			Size = UDim2.new(1, 0, 0, 50),
@@ -647,7 +649,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		AddThemeObject(SetProps(MakeElement("Stroke", Color3.new(0,0,0), 3, 0.7),{}),"Stroke") 
 	}), "Main")
 
-	-- Se não tiver intro, exibe imediatamente com animação
 	if not WindowConfig.IntroEnabled then
 		MainWindow.Visible = true
 		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
@@ -666,15 +667,14 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	MakeDraggable(DragPoint, MainWindow)
 
-	-- Logic do Hub (Botão Flutuante) - Funciona em PC e Mobile agora
 	local _currentKey = Enum.KeyCode.RightShift
 	
 	-- Ícone de abrir (Hub)
 	local OpenButton = SetChildren(SetProps(MakeElement("ImageButton", "http://www.roblox.com/asset/?id=103928780885515"), {
-		Position = UDim2.new(0.01, 0, 0.5, 0), -- Posição inicial no canto esquerdo
+		Position = UDim2.new(0.01, 0, 0.5, 0), 
 		Size = UDim2.new(0, 45, 0, 45),
 		Parent = Orion,
-		Visible = false, -- Começa invisível se a janela estiver aberta
+		Visible = false,
 		BackgroundTransparency = 0.2,
 		BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 	}), { 
@@ -682,32 +682,63 @@ function OrionLib:MakeWindow(WindowConfig)
 		MakeElement("Stroke", Color3.fromRGB(60,60,60), 1)
 	})
 
-	MakeDraggable(OpenButton, OpenButton)
+	-- NOVA LÓGICA DO HUB: Diferencia Arrastar de Clicar
+	local function MakeHubInteractable(Main)
+		local Dragging, DragInput, MousePos, FramePos = false, nil, nil, nil
+		local DragStart = Vector2.new()
+		
+		AddConnection(Main.InputBegan, function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+				Dragging = true
+				MousePos = Input.Position
+				FramePos = Main.Position
+				DragStart = Input.Position
+				
+				Input.Changed:Connect(function()
+					if Input.UserInputState == Enum.UserInputState.End then
+						Dragging = false
+						-- Se moveu menos que 5 pixels, considera um CLIQUE
+						if (Input.Position - DragStart).Magnitude < 5 then
+							MainWindow.Visible = true
+							Main.Visible = false
+							
+							Minimized = false
+							WindowStuff.Visible = true
+							MainWindow.ClipsDescendants = true
+							MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
+							
+							MainWindow.Size = UDim2.new(0,0,0,0)
+							TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 380)}):Play()
+						end
+					end
+				end)
+			end
+		end)
+		
+		AddConnection(Main.InputChanged, function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+				DragInput = Input
+			end
+		end)
+		
+		AddConnection(UserInputService.InputChanged, function(Input)
+			if Input == DragInput and Dragging then
+				local Delta = Input.Position - MousePos
+				TweenService:Create(Main, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					Position = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
+				}):Play()
+			end
+		end)
+	end
 
-	AddConnection(OpenButton.MouseButton1Click, function()
-		-- CORREÇÃO: Resetar totalmente o estado ao reabrir pelo Hub
-		MainWindow.Visible = true
-		OpenButton.Visible = false
-		
-		-- Resetar estado de minimizado se tiver travado
-		Minimized = false
-		WindowStuff.Visible = true
-		MainWindow.ClipsDescendants = true
-		MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-		
-		MainWindow.Size = UDim2.new(0,0,0,0)
-		TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 380)}):Play()
-	end)
+	MakeHubInteractable(OpenButton)
 
 	AddConnection(CloseBtn.MouseButton1Up, function()
 		TweenService:Create(MainWindow, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
 		wait(0.4)
 		MainWindow.Visible = false
 		UIHidden = true
-
-		-- Mostra o botão Hub para TODOS (PC e Mobile)
 		OpenButton.Visible = true
-		
 		WindowConfig.CloseCallback()
 	end)
 
@@ -717,16 +748,13 @@ function OrionLib:MakeWindow(WindowConfig)
 				TweenService:Create(MainWindow, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
 				wait(0.4)
 				MainWindow.Visible = false
-				OpenButton.Visible = true -- Mostra o botão ao fechar com tecla
+				OpenButton.Visible = true 
 			else
-				OpenButton.Visible = false -- Esconde o botão ao abrir
+				OpenButton.Visible = false 
 				MainWindow.Visible = true
-				
-				-- Resetar estado de minimizado ao abrir por tecla
 				Minimized = false
 				WindowStuff.Visible = true
 				MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-				
 				TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 380)}):Play()
 			end
 		end
@@ -749,11 +777,9 @@ function OrionLib:MakeWindow(WindowConfig)
 		Minimized = not Minimized
 	end)
 
-	-- Loading Sutil e Bonito
 	local function LoadSequence()
-		-- Frame pequeno centralizado (estilo Toast)
 		local IntroCard = SetChildren(Create("Frame", {
-			Size = UDim2.new(0, 0, 0, 0), -- Começa sem tamanho
+			Size = UDim2.new(0, 0, 0, 0),
 			Position = UDim2.new(0.5, 0, 0.5, 0),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Parent = Orion,
@@ -763,7 +789,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		}), {
 			MakeElement("Corner", 0, 16),
 			MakeElement("Stroke", Color3.fromRGB(60,60,60), 1),
-			-- Sombra simulada
 			SetProps(MakeElement("Image", "rbxassetid://6015897843"), {
 				Size = UDim2.new(1, 40, 1, 40),
 				Position = UDim2.new(0.5,0,0.5,0),
@@ -777,13 +802,12 @@ function OrionLib:MakeWindow(WindowConfig)
 			})
 		})
 		
-		-- CORRIGIDO: ImageColor3 branco para não ficar azul
 		local LoadSequenceLogo = SetProps(MakeElement("Image", WindowConfig.IntroIcon), {
 			Parent = IntroCard,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.4, 0),
 			Size = UDim2.new(0, 40, 0, 40),
-			ImageColor3 = Color3.fromRGB(255, 255, 255), -- Cor original
+			ImageColor3 = Color3.fromRGB(255, 255, 255),
 			ImageTransparency = 1
 		})
 
@@ -797,18 +821,14 @@ function OrionLib:MakeWindow(WindowConfig)
 			TextTransparency = 1
 		})
 
-		-- Sequencia de Animação
-		-- 1. Abre o card
 		TweenService:Create(IntroCard, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 220, 0, 100)}):Play()
 		wait(0.3)
 		
-		-- 2. Mostra Logo e Texto
 		TweenService:Create(LoadSequenceLogo, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {ImageTransparency = 0, Position = UDim2.new(0.5, 0, 0.35, 0)}):Play()
 		TweenService:Create(LoadSequenceText, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {TextTransparency = 0, Position = UDim2.new(0.5, 0, 0.7, 0)}):Play()
 		
 		wait(1.5)
 		
-		-- 3. Fecha tudo
 		TweenService:Create(LoadSequenceLogo, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {ImageTransparency = 1}):Play()
 		TweenService:Create(LoadSequenceText, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
 		wait(0.2)
@@ -816,7 +836,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		wait(0.4)
 		IntroCard:Destroy()
 
-		-- CORREÇÃO: Só mostra a janela principal AGORA, depois que o loading sumiu
 		MainWindow.Visible = true
 		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 650, 0, 380) 
@@ -1295,8 +1314,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
 					Size = UDim2.new(1, 0, 0, 40),
 					Parent = ItemParent
-					-- Removido clipsdescendants aqui para dropdown poder passar por cima se necessario, mas nesse estilo fica dentro.
-					-- Mantendo clipsdescendants true pois o estilo "gaveta" exige.
 					, ClipsDescendants = true
 				}), {
 					DropdownContainer,
@@ -1453,8 +1470,8 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				local ColorpickerFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
 					Size = UDim2.new(1, 0, 0, 40),
-					Parent = ItemParent,
-					ClipsDescendants = true
+					Parent = ItemParent
+					, ClipsDescendants = true
 				}), {
 					SetProps(SetChildren(MakeElement("TFrame"), {
 						AddThemeObject(SetProps(MakeElement("Label", ColorpickerConfig.Name, 14), {
