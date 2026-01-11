@@ -14,14 +14,14 @@ local OrionLib = {
 	Flags = {},
 	Themes = {
 		Default = {
-			Main = Color3.fromRGB(25, 25, 25), -- Fundo Dark Clean
-			Second = Color3.fromRGB(32, 32, 32), -- Contraste
-			Stroke = Color3.fromRGB(60, 60, 60), -- Bordas Sutis
+			Main = Color3.fromRGB(25, 25, 25),
+			Second = Color3.fromRGB(32, 32, 32),
+			Stroke = Color3.fromRGB(60, 60, 60),
 			Divider = Color3.fromRGB(45, 45, 45),
 			Text = Color3.fromRGB(240, 240, 240),
 			TextDark = Color3.fromRGB(150, 150, 150),
-			Accent = Color3.fromRGB(0, 110, 255), -- Azul Vibrante (Padrão)
-			hover = Color3.fromRGB(40, 40, 40) -- Hover
+			Accent = Color3.fromRGB(0, 110, 255),
+			hover = Color3.fromRGB(40, 40, 40)
 		}
 	},
 	SelectedTheme = "Default",
@@ -537,8 +537,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetProps(MakeElement("Frame"), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}), "Divider"),
-			-- CORREÇÃO DA FOTO DO PERFIL:
-			-- Removido AddThemeObject (que deixava cinza) e forçado ImageColor3 branco
+			-- CORREÇÃO DA FOTO DO PERFIL: GARANTIR COR BRANCA
 			SetChildren(SetProps(MakeElement("TFrame"), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 32, 0, 32),
@@ -548,7 +547,8 @@ function OrionLib:MakeWindow(WindowConfig)
 					Size = UDim2.new(1, 0, 1, 0),
 					BackgroundTransparency = 1,
 					BorderSizePixel = 0,
-					ImageColor3 = Color3.fromRGB(255, 255, 255)
+					ImageColor3 = Color3.fromRGB(255, 255, 255),
+					ZIndex = 5 -- Garante que fica acima de qualquer sombra
 				}), {
 					MakeElement("Corner", 1)
 				})
@@ -683,7 +683,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		MakeElement("Stroke", Color3.fromRGB(60,60,60), 1)
 	})
 
-	-- NOVA LÓGICA DO HUB: Diferencia Arrastar de Clicar
+	-- CORREÇÃO FINAL: Lógica unificada para evitar "double trigger"
 	local function MakeHubInteractable(Main)
 		local Dragging, DragInput, MousePos, FramePos = false, nil, nil, nil
 		local DragStart = Vector2.new()
@@ -695,9 +695,13 @@ function OrionLib:MakeWindow(WindowConfig)
 				FramePos = Main.Position
 				DragStart = Input.Position
 				
-				Input.Changed:Connect(function()
+				-- Usar uma variável local para a conexão para poder desconectar corretamente
+				local Connection
+				Connection = Input.Changed:Connect(function()
 					if Input.UserInputState == Enum.UserInputState.End then
 						Dragging = false
+						Connection:Disconnect() -- Desconecta para não acumular eventos
+						
 						-- Se moveu menos que 5 pixels, considera um CLIQUE
 						if (Input.Position - DragStart).Magnitude < 5 then
 							MainWindow.Visible = true
@@ -733,6 +737,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	end
 
 	MakeHubInteractable(OpenButton)
+	-- Removi a conexão antiga Button1Click para não conflitar com a lógica acima
 
 	AddConnection(CloseBtn.MouseButton1Up, function()
 		TweenService:Create(MainWindow, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
