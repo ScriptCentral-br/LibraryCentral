@@ -655,14 +655,14 @@ function OrionLib:MakeWindow(WindowConfig)
 		Name = "BackgroundPattern",
 		Parent = MainWindow, 
 		BackgroundTransparency = 1,
-		Image = "rbxassetid://3517327730", -- Textura Tech Hexagon
-		TileSize = UDim2.new(0, 30, 0, 30),
+		Image = "rbxassetid://2151741365", -- Mudei para Hexagonos (Mais nitido)
+		TileSize = UDim2.new(0, 40, 0, 40), -- Aumentei um pouco
 		ScaleType = Enum.ScaleType.Tile,
 		Size = UDim2.new(2, 0, 2, 0), -- Tamanho duplo para permitir movimento
 		Position = UDim2.new(0, 0, 0, 0),
 		ZIndex = 0, -- Fica atrás de tudo
-		ImageColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Accent, -- Usa a cor do tema (Azul/Accent)
-		ImageTransparency = 0.92 -- Bem sutil (transparente)
+		ImageColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Accent, -- Usa a cor do tema
+		ImageTransparency = 0.88 -- Mais visivel (era 0.92)
 	})
 	
 	-- Loop de Animação do Fundo
