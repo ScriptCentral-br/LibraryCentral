@@ -14,7 +14,7 @@ local OrionLib = {
 	Flags = {},
 	Themes = {
 		Default = {
-			Main = Color3.fromRGB(25, 25, 25),
+			Main = Color3.fromRGB(18, 18, 18), -- Fundo mais escuro para destacar o efeito
 			Second = Color3.fromRGB(32, 32, 32),
 			Stroke = Color3.fromRGB(60, 60, 60),
 			Divider = Color3.fromRGB(45, 45, 45),
@@ -655,20 +655,20 @@ function OrionLib:MakeWindow(WindowConfig)
 		Name = "BackgroundPattern",
 		Parent = MainWindow, 
 		BackgroundTransparency = 1,
-		Image = "rbxassetid://2151741365", -- Mudei para Hexagonos (Mais nitido)
-		TileSize = UDim2.new(0, 40, 0, 40), -- Aumentei um pouco
+		Image = "rbxassetid://2151741365", -- Textura Hexagonos Tech
+		TileSize = UDim2.new(0, 40, 0, 40),
 		ScaleType = Enum.ScaleType.Tile,
-		Size = UDim2.new(2, 0, 2, 0), -- Tamanho duplo para permitir movimento
+		Size = UDim2.new(2, 0, 2, 0), -- Tamanho duplicado para permitir o loop
 		Position = UDim2.new(0, 0, 0, 0),
-		ZIndex = 0, -- Fica atrás de tudo
-		ImageColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Accent, -- Usa a cor do tema
-		ImageTransparency = 0.88 -- Mais visivel (era 0.92)
+		ZIndex = 0, -- Fica atrás de todo o conteúdo da janela
+		ImageColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Accent, -- Usa a cor do tema selecionado (Azul por padrão)
+		ImageTransparency = 0.6 -- BEM MAIS VISÍVEL AGORA (Era 0.88)
 	})
 	
 	-- Loop de Animação do Fundo
 	spawn(function()
 		local Tween = TweenService:Create(BackgroundPattern, TweenInfo.new(45, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
-			Position = UDim2.new(-1, 0, -1, 0) -- Move na diagonal
+			Position = UDim2.new(-1, 0, -1, 0) -- Move na diagonal infinitamente
 		})
 		Tween:Play()
 	end)
