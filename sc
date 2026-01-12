@@ -22,21 +22,14 @@ local OrionLib = {
 	Flags = {},
 	Themes = {
 		Default = {
-			-- Cores principais
-			Main = Color3.fromRGB(40, 42, 46),       -- Fundo principal
-			Second = Color3.fromRGB(50, 53, 58),      -- Fundo secundário
-			
-			-- Elementos de UI
-			Stroke = Color3.fromRGB(80, 85, 90),     -- Bordas
-			Divider = Color3.fromRGB(70, 75, 80),    -- Divisores
-			
-			-- Textos
-			Text = Color3.fromRGB(230, 230, 230),    -- Texto principal
-			TextDark = Color3.fromRGB(170, 175, 180),-- Texto secundário
-			
-			-- Cores Adicionais (CORRIGIDAS)
+			Main = Color3.fromRGB(40, 42, 46),
+			Second = Color3.fromRGB(50, 53, 58),
+			Stroke = Color3.fromRGB(80, 85, 90),
+			Divider = Color3.fromRGB(70, 75, 80),
+			Text = Color3.fromRGB(230, 230, 230),
+			TextDark = Color3.fromRGB(170, 175, 180),
 			Third = Color3.fromRGB(65, 68, 75),      
-			Hover = Color3.fromRGB(60, 65, 70),      -- Efeito hover (IMPORTANTE: Maiúsculo)
+			Hover = Color3.fromRGB(60, 65, 70),      
 			Accent = Color3.fromRGB(0, 122, 204),    
 			AccentDark = Color3.fromRGB(0, 90, 158), 
 			ToggleOn = Color3.fromRGB(85, 170, 85),  
@@ -208,7 +201,6 @@ local function AddThemeObject(Object, Type)
 	end
 	table.insert(OrionLib.ThemeObjects[Type], Object)
 	
-	-- Proteção contra crash se o tema não existir
 	local themeColor = OrionLib.Themes[OrionLib.SelectedTheme][Type]
 	if themeColor then
 		Object[ReturnProperty(Object)] = themeColor
@@ -353,7 +345,10 @@ CreateElement("ScrollFrame", function(Color, Width)
 		ScrollBarImageColor3 = Color,
 		BorderSizePixel = 0,
 		ScrollBarThickness = Width,
-		CanvasSize = UDim2.new(0, 0, 0, 0)
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		-- FIX ROLAGEM
+		ScrollingDirection = Enum.ScrollingDirection.Y,
+		ElasticBehavior = Enum.ElasticBehavior.Never
 	})
 end)
 
@@ -517,12 +512,13 @@ function OrionLib:MakeWindow(WindowConfig)
 			MakeElement("Padding", 8, 0, 0, 8)
 		}), "Divider")
 
-	-- Correção: Garantir que UIListLayout exista antes de conectar
+	-- FIX CRÍTICO: ROLAGEM
+	-- Garante que o CanvasSize aumente conforme itens são adicionados
 	spawn(function()
-		local Layout = TabHolder:WaitForChild("UIListLayout", 1)
+		local Layout = TabHolder:WaitForChild("UIListLayout", 5)
 		if Layout then
 			AddConnection(Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-				TabHolder.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 16)
+				TabHolder.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 20)
 			end)
 		end
 	end)
@@ -573,7 +569,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetProps(MakeElement("Frame"), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}), "Divider"),
-			-- CORREÇÃO DA FOTO DO PERFIL: GARANTIR COR BRANCA
+			-- CORREÇÃO DA FOTO DO PERFIL
 			SetChildren(SetProps(MakeElement("TFrame"), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 32, 0, 32),
@@ -584,7 +580,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					BackgroundTransparency = 1,
 					BorderSizePixel = 0,
 					ImageColor3 = Color3.fromRGB(255, 255, 255),
-					ZIndex = 5 -- Garante que fica acima de qualquer sombra
+					ZIndex = 5 
 				}), {
 					MakeElement("Corner", 1)
 				})
@@ -750,7 +746,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end)
 		end
 		
-		-- Garante que a janela abre mesmo se o intro falhar
 		MainWindow.Visible = true
 		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 650, 0, 380) 
@@ -783,7 +778,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		MakeElement("Stroke", Color3.fromRGB(60,60,60), 1)
 	})
 
-	-- CORREÇÃO FINAL: Lógica unificada para evitar "double trigger"
 	local function MakeHubInteractable(Main)
 		local Dragging, DragInput, MousePos, FramePos = false, nil, nil, nil
 		local DragStart = Vector2.new()
@@ -795,21 +789,19 @@ function OrionLib:MakeWindow(WindowConfig)
 				FramePos = Main.Position
 				DragStart = Input.Position
 				
-				-- Usar uma variável local para a conexão para poder desconectar corretamente
 				local Connection
 				Connection = Input.Changed:Connect(function()
 					if Input.UserInputState == Enum.UserInputState.End then
 						Dragging = false
-						Connection:Disconnect() -- Desconecta para não acumular eventos
+						Connection:Disconnect() 
 						
-						-- Se moveu menos que 5 pixels, considera um CLIQUE
 						if (Input.Position - DragStart).Magnitude < 5 then
 							MainWindow.Visible = true
 							Main.Visible = false
 							
 							Minimized = false
 							WindowStuff.Visible = true
-							MainWindow.ClipsDescendants = false -- FIX: Garante que está 'aberto' corretamente
+							MainWindow.ClipsDescendants = false 
 							MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
 							
 							MainWindow.Size = UDim2.new(0,0,0,0)
@@ -837,7 +829,6 @@ function OrionLib:MakeWindow(WindowConfig)
 	end
 
 	MakeHubInteractable(OpenButton)
-	-- Removi a conexão antiga Button1Click para não conflitar com a lógica acima
 
 	AddConnection(CloseBtn.MouseButton1Up, function()
 		TweenService:Create(MainWindow, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
