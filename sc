@@ -650,6 +650,29 @@ function OrionLib:MakeWindow(WindowConfig)
 		AddThemeObject(SetProps(MakeElement("Stroke", Color3.new(0,0,0), 3, 0.7),{}),"Stroke") 
 	}), "Main")
 
+	-- EFEITO DE FUNDO DEV/HACKER (ANIMADO)
+	local BackgroundPattern = Create("ImageLabel", {
+		Name = "BackgroundPattern",
+		Parent = MainWindow, 
+		BackgroundTransparency = 1,
+		Image = "rbxassetid://3517327730", -- Textura Tech Hexagon
+		TileSize = UDim2.new(0, 30, 0, 30),
+		ScaleType = Enum.ScaleType.Tile,
+		Size = UDim2.new(2, 0, 2, 0), -- Tamanho duplo para permitir movimento
+		Position = UDim2.new(0, 0, 0, 0),
+		ZIndex = 0, -- Fica atrás de tudo
+		ImageColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Accent, -- Usa a cor do tema (Azul/Accent)
+		ImageTransparency = 0.92 -- Bem sutil (transparente)
+	})
+	
+	-- Loop de Animação do Fundo
+	spawn(function()
+		local Tween = TweenService:Create(BackgroundPattern, TweenInfo.new(45, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
+			Position = UDim2.new(-1, 0, -1, 0) -- Move na diagonal
+		})
+		Tween:Play()
+	end)
+
 	if not WindowConfig.IntroEnabled then
 		MainWindow.Visible = true
 		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
