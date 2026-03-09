@@ -1777,44 +1777,60 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
--- COLOQUE ESSE CÓDIGO NA ÚLTIMA LINHA DO SEU SCRIPT
--- Ele vai detectar automaticamente dispositivos Mobile e reduzir a resolução da sua Library.
-
 task.spawn(function()
-	local UserInputService = game:GetService("UserInputService")
-	
-	-- Verificação segura para saber se é celular (Tem touch e não tem teclado de PC conectado)
-	local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+    local UIS = game:GetService("UserInputService")
+    local GuiService = game:GetService("GuiService")
+    local Camera = workspace.CurrentCamera
+    
+    -- Espera a interface ser criada (Procura pelo objeto "Orion" que a lib cria)
+    local function aplicarEscala()
+        local PARENT = (gethui and gethui()) or game:GetService('CoreGui')
+        local tentou = 0
+        
+        while tentou < 20 do -- Tenta encontrar a interface por 10 segundos
+            for _, gui in ipairs(PARENT:GetChildren()) do
+                -- A Orion cria uma ScreenGui com um Frame chamado "Main" ou similar
+                if gui:IsA("ScreenGui") and (gui.Name == "Orion" or gui:FindFirstChild("Main")) then
+                    local mainFrame = gui:FindFirstChildWhichIsA("Frame")
+                    
+                    if mainFrame then
+                        -- Se já tiver escala, não faz nada
+                        if mainFrame:FindFirstChild("MobileScale") then return end
+                        
+                        local scale = Instance.new("UIScale")
+                        scale.Name = "MobileScale"
+                        
+                        -- LÓGICA DE RESOLUÇÃO:
+                        local viewportSize = Camera.ViewportSize
+                        
+                        if UIS.TouchEnabled and not UIS.KeyboardEnabled then
+                            -- CELULAR: Reduz agressivamente para caber na tela
+                            -- Se a tela for muito pequena (altura < 500), reduz mais ainda
+                            if viewportSize.Y < 500 then
+                                scale.Scale = 0.45
+                            else
+                                scale.Scale = 0.55
+                            end
+                        else
+                            -- PC: Mantém o tamanho padrão ou reduz levemente se a janela for pequena
+                            if viewportSize.Y < 800 then
+                                scale.Scale = 0.85
+                            else
+                                scale.Scale = 1.0
+                            end
+                        end
+                        
+                        scale.Parent = mainFrame
+                        return -- Sucesso!
+                    end
+                end
+            end
+            tentou = tentou + 1
+            task.wait(0.5)
+        end
+    end
 
-	-- Se você estiver no PC e quiser testar como fica o tamanho, mude a linha acima para: 
-	-- local isMobile = true
-
-	if isMobile then
-		-- Aguarda um tempinho para garantir que sua Library terminou de desenhar a interface na tela
-		task.wait(2) 
-		
-		local PARENT = (gethui and gethui()) or game:GetService('CoreGui')
-
-		-- Vasculha a CoreGui para achar a interface que a sua Library acabou de criar
-		for _, gui in ipairs(PARENT:GetChildren()) do
-			if gui:IsA("ScreenGui") then
-				
-				local elementoFilho = gui:FindFirstChildWhichIsA("Frame")
-				
-				-- Tenta evitar as interfaces padrões do próprio Roblox e verifica se existe um Frame filho
-				if not gui.Name:match("Roblox") and not gui.Name:match("Core") and elementoFilho then
-					
-					-- Adiciona o Redimensionador Automático diretamente no elemento FILHO
-					local scale = Instance.new("UIScale")
-					
-					-- 0.65 significa que a interface vai ficar com 65% do tamanho original.
-					-- SE AINDA FICAR GRANDE: Diminua esse número para 0.55 ou 0.50.
-					scale.Scale = 0.65 
-					scale.Parent = elementoFilho
-				end
-			end
-		end
-	end
+    aplicarEscala()
 end)
 
 return OrionLib
