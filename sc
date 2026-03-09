@@ -23,7 +23,7 @@ local OrionLib = {
 			Divider = Color3.fromRGB(70, 75, 80),    -- Divisores
 			
 			-- Textos
-			Text = Color3.fromRGB(230, 230, 230),    -- Texto principal
+			Text = Color3.fromRGB(230, 230, 230),   
 			TextDark = Color3.fromRGB(170, 175, 180),-- Texto secundário
 			
 			-- Novas cores adicionadas (opcionais)
@@ -505,9 +505,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			MakeElement("Padding", 8, 0, 0, 8)
 		}), "Divider")
 
-	-- [CORREÇÃO 2: Removido cálculo manual pesado]
-	-- AddConnection(TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function() ... end)
-
 	local CloseBtn = SetChildren(SetProps(MakeElement("Button"), {
 		Size = UDim2.new(0.5, 0, 1, 0),
 		Position = UDim2.new(0.5, 0, 0, 0),
@@ -554,7 +551,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetProps(MakeElement("Frame"), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}), "Divider"),
-			-- CORREÇÃO DA FOTO DO PERFIL: GARANTIR COR BRANCA
 			SetChildren(SetProps(MakeElement("TFrame"), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 32, 0, 32),
@@ -565,7 +561,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					BackgroundTransparency = 1,
 					BorderSizePixel = 0,
 					ImageColor3 = Color3.fromRGB(255, 255, 255),
-					ZIndex = 5 -- Garante que fica acima de qualquer sombra
+					ZIndex = 5 
 				}), {
 					MakeElement("Corner", 1)
 				})
@@ -637,7 +633,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5), 
 		Size = UDim2.new(0, 0, 0, 0), 
-		ClipsDescendants = true,
+		ClipsDescendants = false, -- Alterado para false para o UIScale não cortar a borda
 		Visible = false 
 	}), {
 		SetChildren(SetProps(MakeElement("TFrame"), {
@@ -667,6 +663,39 @@ function OrionLib:MakeWindow(WindowConfig)
 		AddThemeObject(SetProps(MakeElement("Stroke", Color3.new(0,0,0), 3, 0.7),{}),"Stroke") 
 	}), "Main")
 
+	-- =============================================================
+	-- NOVO: SISTEMA DE ESCALA AUTOMÁTICA INTEGRADO
+	-- =============================================================
+	local UIScale = Instance.new("UIScale")
+	UIScale.Name = "OrionScale"
+	UIScale.Parent = MainWindow
+
+	local function UpdateScale()
+		local UIS = game:GetService("UserInputService")
+		local Camera = workspace.CurrentCamera
+		local ViewportSize = Camera.ViewportSize
+		
+		if UIS.TouchEnabled and not UIS.KeyboardEnabled then
+			-- Se for Mobile, reduz para 55% ou 45% se a tela for minúscula
+			if ViewportSize.Y < 500 then
+				UIScale.Scale = 0.45
+			else
+				UIScale.Scale = 0.55
+			end
+		else
+			-- Se for PC, mantém 100% ou reduz levemente em janelas pequenas
+			if ViewportSize.Y < 800 then
+				UIScale.Scale = 0.85
+			else
+				UIScale.Scale = 1.0
+			end
+		end
+	end
+	
+	UpdateScale()
+	game:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
+	-- =============================================================
+
 	if not WindowConfig.IntroEnabled then
 		MainWindow.Visible = true
 		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
@@ -687,7 +716,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	local _currentKey = Enum.KeyCode.RightShift
 	
-	-- Ícone de abrir (Hub)
 	local OpenButton = SetChildren(SetProps(MakeElement("ImageButton", "http://www.roblox.com/asset/?id=103928780885515"), {
 		Position = UDim2.new(0.01, 0, 0.5, 0), 
 		Size = UDim2.new(0, 45, 0, 45),
@@ -700,7 +728,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		MakeElement("Stroke", Color3.fromRGB(60,60,60), 1)
 	})
 
-	-- CORREÇÃO FINAL: Lógica unificada para evitar "double trigger"
 	local function MakeHubInteractable(Main)
 		local Dragging, DragInput, MousePos, FramePos = false, nil, nil, nil
 		local DragStart = Vector2.new()
@@ -712,21 +739,19 @@ function OrionLib:MakeWindow(WindowConfig)
 				FramePos = Main.Position
 				DragStart = Input.Position
 				
-				-- Usar uma variável local para a conexão para poder desconectar corretamente
 				local Connection
 				Connection = Input.Changed:Connect(function()
 					if Input.UserInputState == Enum.UserInputState.End then
 						Dragging = false
-						Connection:Disconnect() -- Desconecta para não acumular eventos
+						Connection:Disconnect() 
 						
-						-- Se moveu menos que 5 pixels, considera um CLIQUE
 						if (Input.Position - DragStart).Magnitude < 5 then
 							MainWindow.Visible = true
 							Main.Visible = false
 							
 							Minimized = false
 							WindowStuff.Visible = true
-							MainWindow.ClipsDescendants = false -- FIX: Garante que está 'aberto' corretamente
+							MainWindow.ClipsDescendants = false 
 							MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
 							
 							MainWindow.Size = UDim2.new(0,0,0,0)
@@ -754,7 +779,6 @@ function OrionLib:MakeWindow(WindowConfig)
 	end
 
 	MakeHubInteractable(OpenButton)
-	-- Removi a conexão antiga Button1Click para não conflitar com a lógica acima
 
 	AddConnection(CloseBtn.MouseButton1Up, function()
 		TweenService:Create(MainWindow, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
@@ -877,7 +901,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		TabConfig.Icon = TabConfig.Icon or ""
 
 		local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
-			Size = UDim2.new(1, -12, 0, 36), -- Tabs maiores
+			Size = UDim2.new(1, -12, 0, 36),
 			Parent = TabHolder
 		}), {
 			MakeElement("Corner", 0, 6),
@@ -915,12 +939,9 @@ function OrionLib:MakeWindow(WindowConfig)
 			MakeElement("Padding", 15, 15, 15, 15)
 		}), "Divider")
 
-		-- [CORREÇÃO 3: Removido cálculo manual pesado do Container]
-		-- AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function() ... end)
-
 		if FirstTab then
 			FirstTab = false
-			TabFrame.BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second -- Highlight na tab ativa
+			TabFrame.BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second
 			TabFrame.BackgroundTransparency = 0
 			TabFrame.Ico.ImageTransparency = 0
 			TabFrame.Title.TextTransparency = 0
@@ -929,7 +950,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		end
 
 		AddConnection(TabFrame.MouseButton1Click, function()
-			-- Resetar outras tabs
 			for _, Tab in next, TabHolder:GetChildren() do
 				if Tab:IsA("TextButton") then
 					TweenService:Create(Tab, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
@@ -943,14 +963,12 @@ function OrionLib:MakeWindow(WindowConfig)
 					ItemContainer.Visible = false
 				end
 			end
-			-- Ativar tab atual
 			TweenService:Create(TabFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second, BackgroundTransparency = 0}):Play()
 			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
 			TweenService:Create(TabFrame.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 			TabFrame.Title.Font = Enum.Font.GothamBold
 			
 			Container.Visible = true
-			-- Efeito de fade-in no container
 			Container.CanvasPosition = Vector2.new(0,0)
 			Container.Position = UDim2.new(0, 170, 0, 60)
 			TweenService:Create(Container, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0, 170, 0, 50)}):Play()
@@ -962,7 +980,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			function ElementFunction:AddLog(Text)
 				local Label = MakeElement("Label", Text, 15)
 				local LogFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
-					Size = UDim2.new(1, 0, 0, 0), -- Auto size no futuro
+					Size = UDim2.new(1, 0, 0, 0), 
 					BackgroundTransparency = 0.95,
 					Parent = ItemParent
 				}), {
@@ -978,7 +996,6 @@ function OrionLib:MakeWindow(WindowConfig)
 					AddThemeObject(MakeElement("Stroke", nil, 1, 0.8), "Stroke")
 				}), "Second")
 				
-				-- Calcular altura do texto
 				Label.AutomaticSize = Enum.AutomaticSize.Y
 				LogFrame.AutomaticSize = Enum.AutomaticSize.Y
 				
@@ -1070,10 +1087,9 @@ function OrionLib:MakeWindow(WindowConfig)
 					Click
 				}), "Second")
 
-				-- Animação de Hover e Click aprimorada
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-						BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Hover -- Fix case sensitivity
+						BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Hover
 					}):Play()
 					TweenService:Create(ButtonFrame.UIStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 						Color = OrionLib.Themes[OrionLib.SelectedTheme].Accent
@@ -1091,7 +1107,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				AddConnection(Click.MouseButton1Down, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-						Size = UDim2.new(1, -4, 0, 32), -- Efeito de click (encolher levemente)
+						Size = UDim2.new(1, -4, 0, 32),
 					}):Play()
 				end)
 
@@ -1120,7 +1136,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				local Toggle = {Value = ToggleConfig.Default, Save = ToggleConfig.Save}
 				local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, 0, 1, 0) })
 
-				-- Toggle Visual Moderno (estilo iOS/Android)
 				local ToggleTrack = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(50, 50, 50), 1, 0), {
 					Size = UDim2.new(0, 42, 0, 22),
 					Position = UDim2.new(1, -54, 0.5, 0),
@@ -1155,7 +1170,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				function Toggle:Set(Value)
 					Toggle.Value = Value
 					
-					-- Animação do Toggle
 					if Toggle.Value then
 						TweenService:Create(ToggleTrack, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 							BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Accent
@@ -1215,10 +1229,10 @@ function OrionLib:MakeWindow(WindowConfig)
 				local Dragging = false
 
 				local SliderBar = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(40,40,40), 1, 0), {
-					Size = UDim2.new(1, -24, 0, 6), -- Barra mais fina e elegante
+					Size = UDim2.new(1, -24, 0, 6), 
 					Position = UDim2.new(0, 12, 0, 35),
 					AnchorPoint = Vector2.new(0,0),
-					ClipsDescendants = false -- Permite o knob sair um pouco se quiser
+					ClipsDescendants = false 
 				}), {})
 
 				local SliderFill = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 1, 0), {
@@ -1230,7 +1244,6 @@ function OrionLib:MakeWindow(WindowConfig)
 					Position = UDim2.new(1, 0, 0.5, 0),
 					AnchorPoint = Vector2.new(0.5, 0.5)
 				}), {
-					-- Sombra no knob
 					SetProps(MakeElement("Image", "rbxassetid://6015897843"), {
 						Size = UDim2.new(1, 8, 1, 8),
 						Position = UDim2.new(0.5,0,0.5,0),
@@ -1393,7 +1406,6 @@ function OrionLib:MakeWindow(WindowConfig)
 						AddConnection(OptionBtn.MouseButton1Click, function()
 							Dropdown:Set(Option)
 							SaveCfg(game.GameId)
-							-- Fechar ao selecionar
 							Dropdown.Toggled = false
 							TweenService:Create(DropdownFrame.Header.Ico, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Rotation = 0}):Play()
 							TweenService:Create(DropdownFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, 40)}):Play()
@@ -1730,7 +1742,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			local SectionFrame = SetChildren(SetProps(MakeElement("TFrame"), {
 				Size = UDim2.new(1, 0, 0, 26),
 				Parent = Container,
-				-- [CORREÇÃO 4: AutomaticSize para as seções]
 				AutomaticSize = Enum.AutomaticSize.Y
 			}), {
 				AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 13), {
@@ -1741,17 +1752,13 @@ function OrionLib:MakeWindow(WindowConfig)
 				}), "TextDark"),
 				SetChildren(SetProps(MakeElement("TFrame"), {
 					AnchorPoint = Vector2.new(0, 0),
-					Size = UDim2.new(1, 0, 0, 0), -- Alterado para 0
+					Size = UDim2.new(1, 0, 0, 0),
 					Position = UDim2.new(0, 0, 0, 24),
 					Name = "Holder",
-					-- [CORREÇÃO 4: AutomaticSize para o Holder]
 					AutomaticSize = Enum.AutomaticSize.Y
 				}), { MakeElement("List", 0, 8) }),
 			})
 			
-			-- [CORREÇÃO 5: Removido cálculo manual de tamanho da Seção]
-			-- AddConnection(SectionFrame.Holder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function() ... end)
-
 			local SectionFunction = {}
 			for i, v in next, GetElements(SectionFrame.Holder) do SectionFunction[i] = v end
 			return SectionFunction
@@ -1776,61 +1783,5 @@ end
 function OrionLib:Destroy()
 	Orion:Destroy()
 end
-
-task.spawn(function()
-    local UIS = game:GetService("UserInputService")
-    local GuiService = game:GetService("GuiService")
-    local Camera = workspace.CurrentCamera
-    
-    -- Espera a interface ser criada (Procura pelo objeto "Orion" que a lib cria)
-    local function aplicarEscala()
-        local PARENT = (gethui and gethui()) or game:GetService('CoreGui')
-        local tentou = 0
-        
-        while tentou < 20 do -- Tenta encontrar a interface por 10 segundos
-            for _, gui in ipairs(PARENT:GetChildren()) do
-                -- A Orion cria uma ScreenGui com um Frame chamado "Main" ou similar
-                if gui:IsA("ScreenGui") and (gui.Name == "Orion" or gui:FindFirstChild("Main")) then
-                    local mainFrame = gui:FindFirstChildWhichIsA("Frame")
-                    
-                    if mainFrame then
-                        -- Se já tiver escala, não faz nada
-                        if mainFrame:FindFirstChild("MobileScale") then return end
-                        
-                        local scale = Instance.new("UIScale")
-                        scale.Name = "MobileScale"
-                        
-                        -- LÓGICA DE RESOLUÇÃO:
-                        local viewportSize = Camera.ViewportSize
-                        
-                        if UIS.TouchEnabled and not UIS.KeyboardEnabled then
-                            -- CELULAR: Reduz agressivamente para caber na tela
-                            -- Se a tela for muito pequena (altura < 500), reduz mais ainda
-                            if viewportSize.Y < 500 then
-                                scale.Scale = 0.45
-                            else
-                                scale.Scale = 0.55
-                            end
-                        else
-                            -- PC: Mantém o tamanho padrão ou reduz levemente se a janela for pequena
-                            if viewportSize.Y < 800 then
-                                scale.Scale = 0.85
-                            else
-                                scale.Scale = 1.0
-                            end
-                        end
-                        
-                        scale.Parent = mainFrame
-                        return -- Sucesso!
-                    end
-                end
-            end
-            tentou = tentou + 1
-            task.wait(0.5)
-        end
-    end
-
-    aplicarEscala()
-end)
 
 return OrionLib
