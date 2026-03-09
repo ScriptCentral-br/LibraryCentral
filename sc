@@ -676,21 +676,23 @@ function OrionLib:MakeWindow(WindowConfig)
 		local ViewportSize = Camera.ViewportSize
 		
 		if UIS.TouchEnabled and not UIS.KeyboardEnabled then
-			-- Se for Mobile, reduz para 55% ou 45% se a tela for minúscula
-			if ViewportSize.Y < 500 then
-				UIScale.Scale = 0.45
-			else
-				UIScale.Scale = 0.55
-			end
-		else
-			-- Se for PC, mantém 100% ou reduz levemente em janelas pequenas
-			if ViewportSize.Y < 800 then
-				UIScale.Scale = 0.85
-			else
-				UIScale.Scale = 1.0
-			end
-		end
-	end
+            -- CONFIGURAÇÃO PARA CELULAR / TABLET (VALORES REDUZIDOS)
+            if ViewportSize.Y < 500 then
+                -- Telas muito pequenas ou baixa resolução
+                UIScale.Scale = 0.40 -- Reduzido de 0.45 para 0.40
+            else
+                -- Telas de celular padrão (resolução maior)
+                UIScale.Scale = 0.50 -- Reduzido de 0.55 para 0.50
+            end
+        else
+            -- CONFIGURAÇÃO PARA PC (MOUSE E TECLADO)
+            if ViewportSize.Y < 800 then
+                UIScale.Scale = 0.85 
+            else
+                UIScale.Scale = 1.0
+            end
+        end
+    end
 	
 	UpdateScale()
 	game:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
