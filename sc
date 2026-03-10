@@ -633,7 +633,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5), 
 		Size = UDim2.new(0, 0, 0, 0), 
-		ClipsDescendants = false, -- Alterado para false para o UIScale não cortar a borda
+		ClipsDescendants = false, 
 		Visible = false 
 	}), {
 		SetChildren(SetProps(MakeElement("TFrame"), {
@@ -664,7 +664,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	}), "Main")
 
 	-- =============================================================
-	-- NOVO: SISTEMA DE ESCALA AUTOMÁTICA INTEGRADO
+	-- SISTEMA DE ESCALA AUTOMÁTICA INTEGRADO (VERSÃO FORÇADA)
 	-- =============================================================
 	local UIScale = Instance.new("UIScale")
 	UIScale.Name = "OrionScale"
@@ -675,26 +675,29 @@ function OrionLib:MakeWindow(WindowConfig)
 		local Camera = workspace.CurrentCamera
 		local ViewportSize = Camera.ViewportSize
 		
-        if UIS.TouchEnabled and not UIS.KeyboardEnabled then
-            -- CONFIGURAÇÃO PARA CELULAR / TABLET (VALORES REDUZIDOS)
-            if ViewportSize.Y < 300 then
-                -- Telas muito pequenas ou baixa resolução
-                UIScale.Scale = 0.30 -- Reduzido de 0.45 para 0.40
-            else
-                -- Telas de celular padrão (resolução maior)
-                UIScale.Scale = 0.40 -- Reduzido de 0.55 para 0.50
-            end
-        else
-            -- CONFIGURAÇÃO PARA PC (MOUSE E TECLADO)
-            if ViewportSize.Y < 800 then
-                UIScale.Scale = 0.85 
-            else
-                UIScale.Scale = 1.0
-            end
-        end
-    end
+		-- Se tiver Touch, vamos considerar Mobile e forçar a escala baixa
+		if UIS.TouchEnabled then
+			-- CONFIGURAÇÃO PARA CELULAR (VALORES BASTANTE REDUZIDOS)
+			-- Se a interface ainda estiver grande, diminua o 0.35 para 0.30
+			if ViewportSize.Y < 500 then
+				UIScale.Scale = 0.35 
+			else
+				-- Para telemóveis com resoluções nominais maiores
+				UIScale.Scale = 0.40 
+			end
+		else
+			-- CONFIGURAÇÃO PARA PC
+			if ViewportSize.Y < 800 then
+				UIScale.Scale = 0.85 
+			else
+				UIScale.Scale = 1.0
+			end
+		end
+	end
 	
 	UpdateScale()
+	-- Garante que a escala aplica mesmo se o script demorar a carregar
+	task.delay(0.1, UpdateScale)
 	game:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
 	-- =============================================================
 
