@@ -677,7 +677,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		
 		if UIS.TouchEnabled and not UIS.KeyboardEnabled then
             -- CONFIGURAÇÃO PARA CELULAR / TABLET (VALORES REDUZIDOS)
-            if ViewportSize.Y < 500 then
+            if ViewportSize.Y < 400 then
                 -- Telas muito pequenas ou baixa resolução
                 UIScale.Scale = 0.35 -- Reduzido de 0.45 para 0.40
             else
