@@ -632,7 +632,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Parent = Orion,
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5), 
-		Size = UDim2.new(0, 0, 0, 0), 
+		Size = UDim2.new(0, 550, 0, 350), 
 		ClipsDescendants = false, 
 		Visible = false 
 	}), {
@@ -664,42 +664,45 @@ function OrionLib:MakeWindow(WindowConfig)
 	}), "Main")
 
 	-- =============================================================
-	-- SISTEMA DE ESCALA AUTOMÁTICA INTEGRADO (VERSÃO FORÇADA)
+	-- SISTEMA DE ESCALA AUTOMÁTICA INTEGRADO (AJUSTE DE TAMANHO)
 	-- =============================================================
 	local UIScale = Instance.new("UIScale")
 	UIScale.Name = "OrionScale"
 	UIScale.Parent = MainWindow
 
 	local function UpdateScale()
-		local UIS = game:GetService("UserInputService")
 		local Camera = workspace.CurrentCamera
 		local ViewportSize = Camera.ViewportSize
 		
-		-- Se tiver Touch, vamos considerar Mobile e forçar a escala baixa
-		if UIS.TouchEnabled then
-			-- CONFIGURAÇÃO PARA CELULAR (VALORES BASTANTE REDUZIDOS)
-			-- Se a interface ainda estiver grande, diminua o 0.35 para 0.30
+		-- Verifica se a tela é pequena (Mobile/Tablet)
+		if ViewportSize.X < 900 or ViewportSize.Y < 600 then
+			-- MODO MOBILE / TELA PEQUENA (AUMENTADO A PEDIDO)
 			if ViewportSize.Y < 500 then
-				UIScale.Scale = 0.50
+				-- Antes era 0.30, agora 0.45 para ficar maior
+				UIScale.Scale = 0.45 
 			else
-				-- Para telemóveis com resoluções nominais maiores
-				UIScale.Scale = 0.55
+				-- Antes era 0.35, agora 0.50
+				UIScale.Scale = 0.50 
 			end
 		else
-			-- CONFIGURAÇÃO PARA PC
-			if ViewportSize.Y < 800 then
+			-- MODO PC / TELA GRANDE
+			if ViewportSize.Y < 900 then
 				UIScale.Scale = 0.85 
 			else
 				UIScale.Scale = 1.0
 			end
 		end
 	end
-
-
 	
 	UpdateScale()
-	-- Garante que a escala aplica mesmo se o script demorar a carregar
-	task.delay(0.1, UpdateScale)
+	-- Garante a aplicação da escala em múltiplos frames
+	task.spawn(function()
+		for i = 1, 5 do
+			UpdateScale()
+			task.wait(0.5)
+		end
+	end)
+	
 	game:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
 	-- =============================================================
 
