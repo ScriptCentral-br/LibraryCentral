@@ -680,10 +680,10 @@ function OrionLib:MakeWindow(WindowConfig)
 			-- CONFIGURAÇÃO PARA CELULAR (VALORES BASTANTE REDUZIDOS)
 			-- Se a interface ainda estiver grande, diminua o 0.35 para 0.30
 			if ViewportSize.Y < 500 then
-				UIScale.Scale = 0.45
+				UIScale.Scale = 0.50
 			else
 				-- Para telemóveis com resoluções nominais maiores
-				UIScale.Scale = 0.50
+				UIScale.Scale = 0.55
 			end
 		else
 			-- CONFIGURAÇÃO PARA PC
