@@ -679,10 +679,10 @@ function OrionLib:MakeWindow(WindowConfig)
 			-- MODO MOBILE / TELA PEQUENA (AUMENTADO A PEDIDO)
 			if ViewportSize.Y < 500 then
 				-- Antes era 0.30, agora 0.45 para ficar maior
-				UIScale.Scale = 0.55
+				UIScale.Scale = 0.75
 			else
 				-- Antes era 0.35, agora 0.50
-				UIScale.Scale = 0.65 
+				UIScale.Scale = 0.85
 			end
 		else
 			-- MODO PC / TELA GRANDE
