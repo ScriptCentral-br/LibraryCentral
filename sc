@@ -675,14 +675,14 @@ function OrionLib:MakeWindow(WindowConfig)
 		local Camera = workspace.CurrentCamera
 		local ViewportSize = Camera.ViewportSize
 		
-		if UIS.TouchEnabled and not UIS.KeyboardEnabled then
+        if UIS.TouchEnabled and not UIS.KeyboardEnabled then
             -- CONFIGURAÇÃO PARA CELULAR / TABLET (VALORES REDUZIDOS)
-            if ViewportSize.Y < 400 then
+            if ViewportSize.Y < 300 then
                 -- Telas muito pequenas ou baixa resolução
-                UIScale.Scale = 0.35 -- Reduzido de 0.45 para 0.40
+                UIScale.Scale = 0.30 -- Reduzido de 0.45 para 0.40
             else
                 -- Telas de celular padrão (resolução maior)
-                UIScale.Scale = 0.45 -- Reduzido de 0.55 para 0.50
+                UIScale.Scale = 0.40 -- Reduzido de 0.55 para 0.50
             end
         else
             -- CONFIGURAÇÃO PARA PC (MOUSE E TECLADO)
