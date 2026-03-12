@@ -12,7 +12,6 @@ local OrionLib = {
 	ThemeObjects = {},
 	Connections = {},
 	Flags = {},
-	FavoriteEvent = Instance.new("BindableEvent"), -- ADICIONADO: Evento para gerenciar os favoritos
 	Themes = {
 		Default = {
 			-- Cores principais
@@ -1071,77 +1070,32 @@ function OrionLib:MakeWindow(WindowConfig)
 				return ParagraphFunction
 			end
 
-			-- =========================================================================
-			-- BOTÃO ATUALIZADO (Agora suporta a Estrela de Favoritos e o OriginalName)
-			-- =========================================================================
 			function ElementFunction:AddButton(ButtonConfig)
 				ButtonConfig = ButtonConfig or {}
 				ButtonConfig.Name = ButtonConfig.Name or "Button"
 				ButtonConfig.Callback = ButtonConfig.Callback or function() end
 				ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
-				ButtonConfig.CanFavorite = ButtonConfig.CanFavorite or false
-				ButtonConfig.OriginalName = ButtonConfig.OriginalName or ButtonConfig.Name
 
 				local Button = {}
-				
-				-- Limita o tamanho da área de clique se tiver estrela para você não esbarrar na função de executar
-				local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, ButtonConfig.CanFavorite and -40 or 0, 1, 0) })
+				local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, 0, 1, 0) })
 
-				local ChildrenTable = {
+				local ButtonFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
+					Size = UDim2.new(1, 0, 0, 36),
+					Parent = ItemParent
+				}), {
 					AddThemeObject(SetProps(MakeElement("Label", ButtonConfig.Name, 14), {
-						-- Ajusta o espaço do texto caso exista a estrela
-						Size = UDim2.new(1, ButtonConfig.CanFavorite and -70 or -40, 1, 0),
+						Size = UDim2.new(1, -40, 1, 0),
 						Position = UDim2.new(0, 12, 0, 0),
 						Font = Enum.Font.GothamBold,
 						Name = "Content"
 					}), "Text"),
 					AddThemeObject(SetProps(MakeElement("Image", ButtonConfig.Icon), {
 						Size = UDim2.new(0, 20, 0, 20),
-						-- Move o ícone padrao para o lado se a estrela estiver na ponta
-						Position = UDim2.new(1, ButtonConfig.CanFavorite and -60 or -30, 0, 8),
+						Position = UDim2.new(1, -30, 0, 8),
 					}), "TextDark"),
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					Click
-				}
-
-				-- Lógica de injeção da Estrela de Favoritos na Interface
-				if ButtonConfig.CanFavorite then
-					local StarBtn = SetProps(MakeElement("ImageButton", "rbxassetid://7734068321"), {
-						Size = UDim2.new(0, 20, 0, 20),
-						Position = UDim2.new(1, -30, 0, 8),
-						BackgroundTransparency = 1,
-						ImageColor3 = Color3.fromRGB(150, 150, 150),
-						ZIndex = 5,
-						Name = "StarIcon"
-					})
-
-					-- Evento para quando clicar na estrela
-					AddConnection(StarBtn.MouseButton1Click, function()
-						if OrionLib.FavoriteEvent then
-							OrionLib.FavoriteEvent:Fire(ButtonConfig.OriginalName)
-						end
-						-- Animação da estrela (Efeito clique)
-						TweenService:Create(StarBtn, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 16, 0, 16)}):Play()
-						wait(0.1)
-						TweenService:Create(StarBtn, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 20, 0, 20)}):Play()
-					end)
-
-					-- Deixa amarelo quando passar o mouse
-					AddConnection(StarBtn.MouseEnter, function()
-						TweenService:Create(StarBtn, TweenInfo.new(0.2), {ImageColor3 = Color3.fromRGB(255, 215, 0)}):Play()
-					end)
-
-					AddConnection(StarBtn.MouseLeave, function()
-						TweenService:Create(StarBtn, TweenInfo.new(0.2), {ImageColor3 = Color3.fromRGB(150, 150, 150)}):Play()
-					end)
-
-					table.insert(ChildrenTable, StarBtn)
-				end
-
-				local ButtonFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
-					Size = UDim2.new(1, 0, 0, 36),
-					Parent = ItemParent
-				}), ChildrenTable), "Second")
+				}), "Second")
 
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -1176,6 +1130,12 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				function Button:Set(ButtonText)
 					ButtonFrame.Content.Text = ButtonText
+				end
+
+				-- CORREÇÃO PRINCIPAL FEITA AQUI: Expondo a Instance para a Aba Favoritos funcionar e apagá-la
+				Button.Instance = ButtonFrame
+				function Button:Destroy()
+					ButtonFrame:Destroy()
 				end
 
 				return Button
