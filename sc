@@ -12,30 +12,25 @@ local OrionLib = {
 	ThemeObjects = {},
 	Connections = {},
 	Flags = {},
+	-- [NOVO] Evento de Favoritos
+	FavoriteEvent = Instance.new("BindableEvent"),
 	Themes = {
 		Default = {
-			-- Cores principais
-			Main = Color3.fromRGB(40, 42, 46),       -- Fundo principal (cinza escuro suave)
-			Second = Color3.fromRGB(50, 53, 58),      -- Fundo secundário
-			
-			-- Elementos de UI
-			Stroke = Color3.fromRGB(80, 85, 90),     -- Bordas
-			Divider = Color3.fromRGB(70, 75, 80),    -- Divisores
-			
-			-- Textos
-			Text = Color3.fromRGB(230, 230, 230),   
-			TextDark = Color3.fromRGB(170, 175, 180),-- Texto secundário
-			
-			-- Novas cores adicionadas (opcionais)
-			Third = Color3.fromRGB(65, 68, 75),      -- Destaques
-			Hover = Color3.fromRGB(60, 65, 70),      -- Efeito hover
-			Accent = Color3.fromRGB(0, 122, 204),    -- Botões principais
-			AccentDark = Color3.fromRGB(0, 90, 158), -- Botões (hover)
-			ToggleOn = Color3.fromRGB(85, 170, 85),  -- Toggle ativo
-			ToggleOff = Color3.fromRGB(120, 120, 120),-- Toggle inativo
-			Success = Color3.fromRGB(85, 185, 85),   -- Sucesso
-			Warning = Color3.fromRGB(220, 165, 40),  -- Aviso
-			Error = Color3.fromRGB(210, 80, 80)      -- Erro
+			Main = Color3.fromRGB(40, 42, 46),
+			Second = Color3.fromRGB(50, 53, 58),
+			Stroke = Color3.fromRGB(80, 85, 90),
+			Divider = Color3.fromRGB(70, 75, 80),
+			Text = Color3.fromRGB(230, 230, 230),
+			TextDark = Color3.fromRGB(170, 175, 180),
+			Third = Color3.fromRGB(65, 68, 75),
+			Hover = Color3.fromRGB(60, 65, 70),
+			Accent = Color3.fromRGB(0, 122, 204),
+			AccentDark = Color3.fromRGB(0, 90, 158),
+			ToggleOn = Color3.fromRGB(85, 170, 85),
+			ToggleOff = Color3.fromRGB(120, 120, 120),
+			Success = Color3.fromRGB(85, 185, 85),
+			Warning = Color3.fromRGB(220, 165, 40),
+			Error = Color3.fromRGB(210, 80, 80)
 		}
 	},
 	SelectedTheme = "Default",
@@ -43,7 +38,6 @@ local OrionLib = {
 	SaveCfg = false
 }
 
--- Feather Icons Load
 local Icons = {}
 local Success, Response = pcall(function()
 	Icons = HttpService:JSONDecode(game:HttpGetAsync("https://raw.githubusercontent.com/evoincorp/lucideblox/master/src/modules/util/icons.json")).icons
@@ -95,7 +89,6 @@ task.spawn(function()
 	end
 end)
 
--- Sistema de Drag (Arrastar Janela)
 local function MakeDraggable(DragPoint, Main)
 	local Dragging, DragInput, MousePos, FramePos = false
 	AddConnection(DragPoint.InputBegan, function(Input)
@@ -328,7 +321,6 @@ CreateElement("Button", function()
 	})
 end)
 
--- [CORREÇÃO 1: ScrollFrame com AutomaticCanvasSize]
 CreateElement("ScrollFrame", function(Color, Width)
 	return Create("ScrollingFrame", {
 		BackgroundTransparency = 1,
@@ -339,7 +331,6 @@ CreateElement("ScrollFrame", function(Color, Width)
 		BorderSizePixel = 0,
 		ScrollBarThickness = Width,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
-		-- Isso faz o Roblox calcular o tamanho sozinho (Zero Lag)
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
@@ -561,7 +552,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					BackgroundTransparency = 1,
 					BorderSizePixel = 0,
 					ImageColor3 = Color3.fromRGB(255, 255, 255),
-					ZIndex = 5 
+					ZIndex = 5
 				}), {
 					MakeElement("Corner", 1)
 				})
@@ -632,8 +623,8 @@ function OrionLib:MakeWindow(WindowConfig)
 		Parent = Orion,
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5), 
-		Size = UDim2.new(0, 550, 0, 350), 
-		ClipsDescendants = false, 
+		Size = UDim2.new(0, 0, 0, 0), 
+		ClipsDescendants = true,
 		Visible = false 
 	}), {
 		SetChildren(SetProps(MakeElement("TFrame"), {
@@ -661,9 +652,9 @@ function OrionLib:MakeWindow(WindowConfig)
 		DragPoint,
 		WindowStuff,
 		AddThemeObject(SetProps(MakeElement("Stroke", Color3.new(0,0,0), 3, 0.7),{}),"Stroke") 
-	}), "Main")
+	}), "Main") -- Inicio aqui nEssa
 
-	-- =============================================================
+-- =============================================================
 	-- SISTEMA DE ESCALA AUTOMÁTICA INTEGRADO (AJUSTE DE TAMANHO)
 	-- =============================================================
 	local UIScale = Instance.new("UIScale")
@@ -706,7 +697,8 @@ function OrionLib:MakeWindow(WindowConfig)
 	game:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
 	-- =============================================================
 
-	if not WindowConfig.IntroEnabled then
+
+	if not WindowConfig.IntroEnabled then --- FINAL 
 		MainWindow.Visible = true
 		TweenService:Create(MainWindow, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 650, 0, 380) 
@@ -753,7 +745,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				Connection = Input.Changed:Connect(function()
 					if Input.UserInputState == Enum.UserInputState.End then
 						Dragging = false
-						Connection:Disconnect() 
+						Connection:Disconnect()
 						
 						if (Input.Position - DragStart).Magnitude < 5 then
 							MainWindow.Visible = true
@@ -761,7 +753,7 @@ function OrionLib:MakeWindow(WindowConfig)
 							
 							Minimized = false
 							WindowStuff.Visible = true
-							MainWindow.ClipsDescendants = false 
+							MainWindow.ClipsDescendants = false
 							MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
 							
 							MainWindow.Size = UDim2.new(0,0,0,0)
@@ -951,7 +943,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		if FirstTab then
 			FirstTab = false
-			TabFrame.BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second
+			TabFrame.BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second 
 			TabFrame.BackgroundTransparency = 0
 			TabFrame.Ico.ImageTransparency = 0
 			TabFrame.Title.TextTransparency = 0
@@ -990,7 +982,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			function ElementFunction:AddLog(Text)
 				local Label = MakeElement("Label", Text, 15)
 				local LogFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
-					Size = UDim2.new(1, 0, 0, 0), 
+					Size = UDim2.new(1, 0, 0, 0),
 					BackgroundTransparency = 0.95,
 					Parent = ItemParent
 				}), {
@@ -1075,9 +1067,26 @@ function OrionLib:MakeWindow(WindowConfig)
 				ButtonConfig.Name = ButtonConfig.Name or "Button"
 				ButtonConfig.Callback = ButtonConfig.Callback or function() end
 				ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
+				
+				ButtonConfig.OriginalName = ButtonConfig.OriginalName or tostring(ButtonConfig.Name or "")
+				local Splitted = string.split(ButtonConfig.Name, " / ")
+				local Script = Splitted and Splitted[2]
+
+				if Script then
+					ButtonConfig.Name = Script
+					ButtonConfig.CanFavorite = true
+				end
 
 				local Button = {}
 				local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, 0, 1, 0) })
+				
+				local FavoriteButton = ButtonConfig.CanFavorite and SetProps(MakeElement("ImageButton", "http://www.roblox.com/asset/?id=109586771228631"), {
+					Size = UDim2.new(0, 20, 0, 20),
+					Position = UDim2.new(1, -55, 0, 8),
+					ZIndex = 25,
+					Name = "Favorite",
+					BackgroundTransparency = 1
+				})
 
 				local ButtonFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {
 					Size = UDim2.new(1, 0, 0, 36),
@@ -1093,13 +1102,20 @@ function OrionLib:MakeWindow(WindowConfig)
 						Size = UDim2.new(0, 20, 0, 20),
 						Position = UDim2.new(1, -30, 0, 8),
 					}), "TextDark"),
+					ButtonConfig.CanFavorite and AddThemeObject(FavoriteButton, "TextDark") or nil,
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					Click
 				}), "Second")
+				
+				if FavoriteButton then
+					AddConnection(FavoriteButton.MouseButton1Down, function()
+						OrionLib.FavoriteEvent:Fire(ButtonConfig.OriginalName)
+					end)
+				end
 
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-						BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Hover
+						BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Hover 
 					}):Play()
 					TweenService:Create(ButtonFrame.UIStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 						Color = OrionLib.Themes[OrionLib.SelectedTheme].Accent
@@ -1132,11 +1148,8 @@ function OrionLib:MakeWindow(WindowConfig)
 					ButtonFrame.Content.Text = ButtonText
 				end
 
-				-- CORREÇÃO PRINCIPAL FEITA AQUI: Expondo a Instance para a Aba Favoritos funcionar e apagá-la
-				Button.Instance = ButtonFrame
-				function Button:Destroy()
-					ButtonFrame:Destroy()
-				end
+                -- [FIX CRÍTICO] Expondo o Instance para permitir que ele seja destruído pelo Hub
+                Button.Instance = ButtonFrame
 
 				return Button
 			end
@@ -1245,10 +1258,10 @@ function OrionLib:MakeWindow(WindowConfig)
 				local Dragging = false
 
 				local SliderBar = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(40,40,40), 1, 0), {
-					Size = UDim2.new(1, -24, 0, 6), 
+					Size = UDim2.new(1, -24, 0, 6),
 					Position = UDim2.new(0, 12, 0, 35),
 					AnchorPoint = Vector2.new(0,0),
-					ClipsDescendants = false 
+					ClipsDescendants = false
 				}), {})
 
 				local SliderFill = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 1, 0), {
@@ -1751,7 +1764,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			return ElementFunction
 		end
 		
-		-- Section
 		local ElementFunction = {}
 		function ElementFunction:AddSection(SectionConfig)
 			SectionConfig.Name = SectionConfig.Name or "Section"
@@ -1768,7 +1780,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				}), "TextDark"),
 				SetChildren(SetProps(MakeElement("TFrame"), {
 					AnchorPoint = Vector2.new(0, 0),
-					Size = UDim2.new(1, 0, 0, 0),
+					Size = UDim2.new(1, 0, 0, 0), 
 					Position = UDim2.new(0, 0, 0, 24),
 					Name = "Holder",
 					AutomaticSize = Enum.AutomaticSize.Y
